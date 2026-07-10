@@ -1,161 +1,162 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { motion } from 'framer-motion';
-import { FaBars, FaTimes, FaHeart, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaSignOutAlt, FaHome, FaBuilding, FaHeart, FaEnvelope, FaBars } from 'react-icons/fa';
 import { useState } from 'react';
-import Logo from './Logo';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
-    await logout();
-    setMobileMenuOpen(false);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
-  const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/properties', label: 'Properties' },
-  ];
-
-  if (isAuthenticated && user?.role === 'landlord') {
-    navLinks.push({ path: '/dashboard', label: 'Dashboard' });
-  }
-
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 bg-white shadow-lg z-50"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Logo />
+    <nav className="bg-blue-600 text-white shadow-lg fixed w-full top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 text-2xl font-bold">
+          🏠 HouseHunt
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="text-gray-700 hover:text-blue-500 transition-colors font-medium"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center gap-6">
+          {/* Public Links */}
+          <Link to="/" className="hover:text-blue-100 transition-colors">
+            Home
+          </Link>
+          <Link to="/properties" className="hover:text-blue-100 transition-colors">
+            Properties
+          </Link>
 
-          {/* Auth Buttons & User Menu */}
-          <div className="hidden md:flex items-center gap-4">
-            {isAuthenticated ? (
-              <div className="flex items-center gap-4">
-                {user?.role === 'tenant' && (
-                  <Link to="/favorites" className="text-gray-700 hover:text-red-500 transition-colors">
-                    <FaHeart size={20} />
+          {isAuthenticated ? (
+            <>
+              {/* User Links */}
+              {user?.role === 'tenant' && (
+                <Link to="/favorites" className="hover:text-blue-100 transition-colors">
+                  ❤️ Favorites
+                </Link>
+              )}
+
+              {user?.role === 'landlord' && (
+                <>
+                  <Link to="/dashboard" className="hover:text-blue-100 transition-colors">
+                    Dashboard
                   </Link>
-                )}
-                <Link
-                  to="/profile"
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  <FaUser size={16} />
-                  {user?.name?.split(' ')[0]}
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                >
-                  <FaSignOutAlt size={16} />
-                </button>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-blue-500 border border-blue-500 rounded-lg hover:bg-blue-50 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Register
-                </Link>
-              </div>
-            )}
-          </div>
+                  <Link to="/my-properties" className="hover:text-blue-100 transition-colors">
+                    My Properties
+                  </Link>
+                </>
+              )}
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-gray-700"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden pb-4 border-t"
-          >
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
+              <Link to="/messages" className="hover:text-blue-100 transition-colors">
+                Messages
               </Link>
-            ))}
-            <div className="px-4 py-2 border-t mt-2">
-              {isAuthenticated ? (
-                <div className="space-y-2">
+
+              {/* Profile Dropdown */}
+              <div className="relative group">
+                <button className="flex items-center gap-2 hover:text-blue-100 transition-colors">
+                  <FaUser size={18} />
+                  {user?.name?.split(' ')[0]}
+                </button>
+                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 bg-blue-500 text-white rounded-lg text-center"
-                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 hover:bg-gray-100 rounded-t-lg"
                   >
                     Profile
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-2 bg-red-500 text-white rounded-lg"
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg"
                   >
                     Logout
                   </button>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <Link
-                    to="/login"
-                    className="block px-4 py-2 text-blue-500 border border-blue-500 rounded-lg text-center"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block px-4 py-2 bg-blue-500 text-white rounded-lg text-center"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden text-2xl"
+        >
+          <FaBars />
+        </button>
       </div>
-    </motion.nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-blue-700 px-4 py-4 space-y-3">
+          <Link to="/" className="block hover:text-blue-100">
+            Home
+          </Link>
+          <Link to="/properties" className="block hover:text-blue-100">
+            Properties
+          </Link>
+
+          {isAuthenticated ? (
+            <>
+              {user?.role === 'tenant' && (
+                <Link to="/favorites" className="block hover:text-blue-100">
+                  ❤️ Favorites
+                </Link>
+              )}
+              {user?.role === 'landlord' && (
+                <>
+                  <Link to="/dashboard" className="block hover:text-blue-100">
+                    Dashboard
+                  </Link>
+                  <Link to="/my-properties" className="block hover:text-blue-100">
+                    My Properties
+                  </Link>
+                </>
+              )}
+              <Link to="/messages" className="block hover:text-blue-100">
+                Messages
+              </Link>
+              <Link to="/profile" className="block hover:text-blue-100">
+                Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left block hover:text-blue-100"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="block hover:text-blue-100">
+                Login
+              </Link>
+              <Link to="/register" className="block hover:text-blue-100">
+                Register
+              </Link>
+            </>
+          )}
+        </div>
+      )}
+    </nav>
   );
 };
 
